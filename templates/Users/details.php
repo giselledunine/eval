@@ -39,9 +39,14 @@
             </tbody>
 
         </table>
+            <?php if(!empty($this->request->getAttribute('identity'))): ?>
+            <?php if ($list->user_id === $this->request->getAttribute('identity')->id): ?>
             <?= $this->Html->link('Modifier', ['controller' => 'Todolists', 'action' => 'update', $list->id], ['class' => 'button is-link']) ?>
             <?= $this->Form->postLink('Supprimer', ['controller' => 'Todolists', 'action' => 'delete', $list->id], ['class' => 'button is-danger is-light'], ['confirm' => 'Etes-vous sûr de vouloir supprimer cette liste ?']) ?>
+            <?php endif; ?>
+
             <?= $this->Html->link('Copier', ['controller'=>'Todolists', 'action' => 'copy', $list->id], ['class' => 'button']) ?>
+    <?php endif; ?>
         </div>
     </article>
 </div>
