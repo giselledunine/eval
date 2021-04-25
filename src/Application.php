@@ -28,6 +28,11 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Application setup class.
@@ -35,7 +40,9 @@ use Cake\Routing\Middleware\RoutingMiddleware;
  * This defines the bootstrapping logic and middleware layers you
  * want to use in your application.
  */
-class Application extends BaseApplication
+
+
+class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
     /**
      * Load all the application configuration and bootstrap logic.
@@ -76,6 +83,10 @@ class Application extends BaseApplication
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
         $middlewareQueue
+            // ... other middleware added before
+            ->add(new RoutingMiddleware($this))
+            // add Authentication after RoutingMiddleware
+            ->add(new AuthenticationMiddleware($this))
             // Catch any exceptions in the lower layers,
             // and make an error page/response
             ->add(new ErrorHandlerMiddleware(Configure::read('Error')))
@@ -136,5 +147,38 @@ class Application extends BaseApplication
         $this->addPlugin('Migrations');
 
         // Load more plugins here
+    }
+
+    //Authentification
+    public function getAuthenticationService(ServerRequestInterface $request) : AuthenticationServiceInterface{
+        $auth = new AuthenticationService([
+            'unauthenticatedRedirect' => '/users/login',
+            'queryParam' => 'redirect'
+        ]);
+
+        $auth->loadIdentifier('Authentication.Password', [
+            'fields' => [
+                'username' => 'username',
+                'password' => 'password'
+            ]
+        ]);
+
+        $auth->loadAuthenticator('Authentication.Session');
+
+        $auth->loadAuthenticator('Authentication.Form', [
+            'fields' => [
+                'username' => 'username',
+                'password' => 'password'
+            ],
+            'loginUrl' => '/users/login'
+        ]);
+
+        return $auth;
+    }
+    public function beforeFilter(\Cake\Event\EventInterface $event) {
+        parent::beforeFilter($event);
+        //autorise l'affiche des actions index de TOUS les controllers même si on est pas connecté
+
+        $this->Authentication->addUnauthenticatedActions(['login']);
     }
 }

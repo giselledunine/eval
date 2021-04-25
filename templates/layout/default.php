@@ -29,22 +29,77 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
 
     <link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet">
 
-    <?= $this->Html->css(['normalize.min', 'milligram.min', 'cake']) ?>
+    <?= $this->Html->css(['bulma/bulma.min']) ?>
 
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
 </head>
 <body>
-    <nav class="top-nav">
-        <div class="top-nav-title">
-            <a href="<?= $this->Url->build('/') ?>"><span>Cake</span>PHP</a>
+<nav class="navbar is-vcentered" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+            <?= $this->Html->link('ToDoLists', ['controller'=>'Users', 'action' => 'index'], ['class' => 'title is-4 navbar-item mb-0']) ?>
+
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+    </div>
+
+
+    <div id="navbarBasicExample" class="navbar-menu">
+
+        <?php if($this->request->getAttribute('identity') !== null) : ?>
+        <div class="navbar-start">
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                <?= $this->Html->link('Mes listes', ['controller'=>'Todolists', 'action' => 'view', $this->request->getAttribute('identity')->id], ['class' => 'navbar-link']) ?>
+
+                <div class="navbar-dropdown">
+                    <?= $this->Html->link('Créer une liste', ['controller'=>'Todolists', 'action' => 'new'], ['class' => 'navbar-item']) ?>
+                </div>
+                </div>
+                <?= $this->Html->link('Mes messages', ['controller'=>'Messages', 'action' => 'index'], ['class' => 'navbar-item']) ?>
+
         </div>
-        <div class="top-nav-links">
-            <a target="_blank" rel="noopener" href="https://book.cakephp.org/4/">Documentation</a>
-            <a target="_blank" rel="noopener" href="https://api.cakephp.org/">API</a>
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <?= $this->Html->link($this->request->getAttribute('identity')->username, ['controller'=>'Users', 'action' => 'options', $this->request->getAttribute('identity')->id], ['class' => 'button is-primary is-outlined']) ?>
+                    <div class="navbar-dropdown is-right">
+                        <?=  $this->Html->link('Modifier son compte', ['controller'=>'Users', 'action' => 'options', $this->request->getAttribute('identity')->id], ['class' => 'navbar-item has-text-info']) ?>
+                        <?=  $this->Html->link('Se déconnecter', ['controller'=>'Users', 'action' => 'logout'], ['class' => 'navbar-item has-text-danger']) ?>
+                    </div>
+                </div>
+            </div>
+            <?php if(!empty($this->request->getAttribute('identity')->avatar)) : ?>
+                <figure class="image is-48x48 mt-2 mb-2 mr-3">
+                    <?= $this->Html->image('data/pictures/'.$this->request->getAttribute('identity')->avatar, ['class' => 'is-rounded']) ?>
+                </figure>
+            <?php else : ?>
+                <figure class="image is-48x48 mt-2 mb-2 mr-3">
+                    <?= $this->Html->image('data/pictures/defaultavatar.jpg', ['class' => 'is-rounded']) ?>
+                </figure>
+            <?php endif ; ?>
         </div>
-    </nav>
+
+        <?php else: ?>
+
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons">
+                    <?=  $this->Html->link('Créer un compte', ['controller'=>'Users', 'action' => 'new'], ['class' => 'button is-primary']) ?>
+                    <?=  $this->Html->link('Se connecter', ['controller'=>'Users', 'action' => 'login'], ['class' => 'button is-primary is-outlined']) ?>
+                </div>
+            </div>
+        </div>
+
+        <?php endif; ?>
+
+    </div>
+</nav>
+
     <main class="main">
         <div class="container">
             <?= $this->Flash->render() ?>
